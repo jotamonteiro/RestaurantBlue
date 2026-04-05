@@ -1,6 +1,6 @@
 package br.com.joaomonteiro.restaurantBlue.model;
 
-import br.com.joaomonteiro.restaurantBlue.auxiliar.Pagamento;
+import br.com.joaomonteiro.restaurantBlue.auxiliar.StatusPagamento;
 import br.com.joaomonteiro.restaurantBlue.auxiliar.StatusPedido;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
@@ -22,7 +22,7 @@ public class Pedido {
     @Enumerated(EnumType.STRING)
     private StatusPedido status;
     @Enumerated(EnumType.STRING)
-    private Pagamento pagamento;
+    private StatusPagamento statusPagamento;
     @NotBlank
     private LocalDateTime dataHora;
 

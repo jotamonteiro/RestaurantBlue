@@ -18,13 +18,9 @@ public class Produto {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank
     private String nome;
-    @NotBlank
     private String descricao;
-    @NotBlank
     private Double preco;
-    @NotBlank
     private Categoria categoria;
     private boolean disponivel = false;
 }
