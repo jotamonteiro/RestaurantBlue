@@ -23,4 +23,14 @@ public class Funcionario extends Pessoa{
     private Cargo cargo;
     private LocalDate dataAdm;
 
+    private String cep;
+
+    private String logradouro;
+
+    private String bairro;
+
+    private String localidade;
+
+    private String uf;
+
 }

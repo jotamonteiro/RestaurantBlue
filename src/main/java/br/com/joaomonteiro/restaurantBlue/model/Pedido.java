@@ -23,7 +23,5 @@ public class Pedido {
     private StatusPedido status;
     @Enumerated(EnumType.STRING)
     private StatusPagamento statusPagamento;
-    @NotBlank
-    private LocalDateTime dataHora;
 
 }
