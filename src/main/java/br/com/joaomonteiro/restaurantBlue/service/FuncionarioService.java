@@ -1,5 +1,7 @@
 package br.com.joaomonteiro.restaurantBlue.service;
 
+import br.com.joaomonteiro.restaurantBlue.client.ViaCepClient;
+import br.com.joaomonteiro.restaurantBlue.dto.ViaCepResponseDTO;
 import br.com.joaomonteiro.restaurantBlue.model.Funcionario;
 import br.com.joaomonteiro.restaurantBlue.repository.FuncionarioRepository;
 import lombok.RequiredArgsConstructor;
@@ -13,8 +15,20 @@ import java.util.Optional;
 public class FuncionarioService {
 
     private final FuncionarioRepository repository;
+    private final ViaCepClient viaCepClient;
 
     public Funcionario criarFunc(Funcionario funcionario){
+        if (funcionario.getCep() != null && !funcionario.getCep().isBlank()) {
+            String cepLimpo = funcionario.getCep().replaceAll("\\D", "");
+            ViaCepResponseDTO endereco = viaCepClient.buscarPorCep(cepLimpo);
+
+            funcionario.setCep(endereco.getCep());
+            funcionario.setLogradouro(endereco.getLogradouro());
+            funcionario.setBairro(endereco.getBairro());
+            funcionario.setLocalidade(endereco.getLocalidade());
+            funcionario.setUf(endereco.getUf());
+        }
+
         return repository.save(funcionario);
     }
 

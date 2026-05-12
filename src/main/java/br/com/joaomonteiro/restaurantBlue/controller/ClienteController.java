@@ -3,6 +3,7 @@ package br.com.joaomonteiro.restaurantBlue.controller;
 
 import br.com.joaomonteiro.restaurantBlue.model.Cliente;
 import br.com.joaomonteiro.restaurantBlue.service.ClienteService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,7 +18,7 @@ public class ClienteController {
     private final ClienteService clienteService;
 
     @PostMapping
-    public Cliente criarCliente(@RequestBody Cliente cliente){
+    public Cliente criarCliente(@Valid @RequestBody Cliente cliente){
         return clienteService.criarCliente(cliente);
     }
 
