@@ -1,6 +1,14 @@
 package br.com.joaomonteiro.restaurantBlue.service;
 
+import br.com.joaomonteiro.restaurantBlue.auxiliar.StatusPagamento;
+import br.com.joaomonteiro.restaurantBlue.auxiliar.StatusPedido;
+import br.com.joaomonteiro.restaurantBlue.dto.PedidoDTO;
+import br.com.joaomonteiro.restaurantBlue.exception.EntidadeNaoEncontradaException;
+import br.com.joaomonteiro.restaurantBlue.model.Cliente;
+import br.com.joaomonteiro.restaurantBlue.model.Mesa;
 import br.com.joaomonteiro.restaurantBlue.model.Pedido;
+import br.com.joaomonteiro.restaurantBlue.repository.ClienteRepository;
+import br.com.joaomonteiro.restaurantBlue.repository.MesaRepository;
 import br.com.joaomonteiro.restaurantBlue.repository.PedidoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -12,48 +20,122 @@ import java.util.List;
 public class PedidoService {
 
     private final PedidoRepository repository;
+    private final MesaRepository mesaRepository;
+    private final ClienteRepository clienteRepository;
 
-    public Pedido criarPedido(Pedido pedido){
-        return repository.save(pedido);
+    public PedidoDTO criarPedido(PedidoDTO pedidoDTO){
+        Pedido pedido = dtoToEntity(pedidoDTO);
+        Pedido pedidoSalvo = repository.save(pedido);
+        return entityToDTO(pedidoSalvo);
     }
 
-    public List<Pedido> listarPedidos(){
-        return repository.findAll();
+    public List<PedidoDTO> listarPedidos(){
+        return repository.findAll().stream()
+                .map(this::entityToDTO)
+                .toList();
     }
 
-    public Pedido buscarPorID(Long id) {
-        if (repository.findById(id).isEmpty()) {
-            throw new RuntimeException("Pedido Não Registrado");
-        } else {
-            return repository.findById(id).get();
-        }
+    public PedidoDTO buscarPorID(Long id) {
+        Pedido pedido = repository.findById(id)
+                .orElseThrow(() -> new EntidadeNaoEncontradaException("Pedido Não Registrado"));
+        return entityToDTO(pedido);
     }
 
-    public Pedido atualizarPedido(Pedido pedido, Long id) {
+    public PedidoDTO atualizarPedido(PedidoDTO pedidoDTO, Long id) {
         Pedido pedidoExistente = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Pedido Não Registrado"));
+                .orElseThrow(() -> new EntidadeNaoEncontradaException("Pedido Não Registrado"));
 
-        if (pedido.getDescricao() != null) {
-            pedidoExistente.setDescricao(pedido.getDescricao());
+        if (pedidoDTO.getDescricao() != null) {
+            pedidoExistente.setDescricao(pedidoDTO.getDescricao());
         }
 
-        if (pedido.getValor() != null) {
-            pedidoExistente.setValor(pedido.getValor());
+        if (pedidoDTO.getValor() != null) {
+            pedidoExistente.setValor(pedidoDTO.getValor());
         }
 
-        if (pedido.getStatus() != null) {
-            pedidoExistente.setStatus(pedido.getStatus());
+        if (pedidoDTO.getStatus() != null) {
+            pedidoExistente.setStatus(pedidoDTO.getStatus());
         }
 
-        return repository.save(pedidoExistente);
+        if (pedidoDTO.getStatusPagamento() != null) {
+            pedidoExistente.setStatusPagamento(pedidoDTO.getStatusPagamento());
+        }
+
+        if (pedidoDTO.getMesaId() != null) {
+            Mesa mesa = mesaRepository.findById(pedidoDTO.getMesaId())
+                    .orElseThrow(() -> new EntidadeNaoEncontradaException("Mesa Não Registrada"));
+            pedidoExistente.setMesa(mesa);
+        }
+
+        if (pedidoDTO.getClienteId() != null) {
+            Cliente cliente = clienteRepository.findById(pedidoDTO.getClienteId())
+                    .orElseThrow(() -> new EntidadeNaoEncontradaException("Cliente Não Registrado"));
+            pedidoExistente.setCliente(cliente);
+        }
+
+        Pedido pedidoAtualizado = repository.save(pedidoExistente);
+        return entityToDTO(pedidoAtualizado);
     }
 
     public void excluirPedido(Long id) {
         if (repository.findById(id).isEmpty()) {
-            throw new RuntimeException("Pedido Não Registrado");
+            throw new EntidadeNaoEncontradaException("Pedido Não Registrado");
         } else {
             repository.deleteById(id);
         }
+    }
+
+    public List<PedidoDTO> buscarPorStatus(StatusPedido status) {
+        return repository.buscarPorStatus(status).stream()
+                .map(this::entityToDTO)
+                .toList();
+    }
+
+    public List<PedidoDTO> buscarPorStatusPagamento(StatusPagamento statusPagamento) {
+        return repository.buscarPorStatusPagamento(statusPagamento).stream()
+                .map(this::entityToDTO)
+                .toList();
+    }
+
+    private PedidoDTO entityToDTO(Pedido pedido) {
+        PedidoDTO dto = new PedidoDTO();
+        dto.setId(pedido.getId());
+        dto.setDescricao(pedido.getDescricao());
+        dto.setValor(pedido.getValor());
+        dto.setStatus(pedido.getStatus());
+        dto.setStatusPagamento(pedido.getStatusPagamento());
+        if (pedido.getMesa() != null) {
+            dto.setMesaId(pedido.getMesa().getId());
+        }
+        if (pedido.getCliente() != null) {
+            dto.setClienteId(pedido.getCliente().getId());
+        }
+        return dto;
+    }
+
+    private Pedido dtoToEntity(PedidoDTO dto) {
+        Pedido pedido = new Pedido();
+        if (dto.getId() != null) {
+            pedido.setId(dto.getId());
+        }
+        pedido.setDescricao(dto.getDescricao());
+        pedido.setValor(dto.getValor());
+        pedido.setStatus(dto.getStatus());
+        pedido.setStatusPagamento(dto.getStatusPagamento());
+        
+        if (dto.getMesaId() != null) {
+            Mesa mesa = mesaRepository.findById(dto.getMesaId())
+                    .orElseThrow(() -> new EntidadeNaoEncontradaException("Mesa Não Registrada"));
+            pedido.setMesa(mesa);
+        }
+        
+        if (dto.getClienteId() != null) {
+            Cliente cliente = clienteRepository.findById(dto.getClienteId())
+                    .orElseThrow(() -> new EntidadeNaoEncontradaException("Cliente Não Registrado"));
+            pedido.setCliente(cliente);
+        }
+        
+        return pedido;
     }
 
 }

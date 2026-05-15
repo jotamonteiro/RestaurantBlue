@@ -1,5 +1,8 @@
 package br.com.joaomonteiro.restaurantBlue.service;
 
+import br.com.joaomonteiro.restaurantBlue.auxiliar.StatusMesa;
+import br.com.joaomonteiro.restaurantBlue.dto.MesaDTO;
+import br.com.joaomonteiro.restaurantBlue.exception.EntidadeNaoEncontradaException;
 import br.com.joaomonteiro.restaurantBlue.model.Mesa;
 import br.com.joaomonteiro.restaurantBlue.repository.MesaRepository;
 import lombok.RequiredArgsConstructor;
@@ -13,42 +16,69 @@ public class MesaService {
 
     public final MesaRepository repository;
 
-    public Mesa criarMesa(Mesa mesa){
-        return repository.save(mesa);
+    public MesaDTO criarMesa(MesaDTO mesaDTO){
+        Mesa mesa = dtoToEntity(mesaDTO);
+        Mesa mesaSalva = repository.save(mesa);
+        return entityToDTO(mesaSalva);
     }
 
-    public Mesa buscarPorID(Long id){
-        return repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Mesa não encontrada"));
+    public MesaDTO buscarPorID(Long id){
+        Mesa mesa = repository.findById(id)
+                .orElseThrow(() -> new EntidadeNaoEncontradaException("Mesa não encontrada"));
+        return entityToDTO(mesa);
     }
 
-    public List<Mesa> listarMesas() {
-        return repository.findAll();
+    public List<MesaDTO> listarMesas() {
+        return repository.findAll().stream()
+                .map(this::entityToDTO)
+                .toList();
     }
 
-    public Mesa atualizarMesa(Mesa mesa, Long id){
-        Mesa mesaExistente = buscarPorID(id);
+    public MesaDTO atualizarMesa(MesaDTO mesaDTO, Long id){
+        Mesa mesaExistente = repository.findById(id)
+                .orElseThrow(() -> new EntidadeNaoEncontradaException("Mesa não encontrada"));
         
-        if(mesa.getNumero() > 0) {
-            mesaExistente.setNumero(mesa.getNumero());
+        if(mesaDTO.getNumero() > 0) {
+            mesaExistente.setNumero(mesaDTO.getNumero());
         }
         
-        if(mesa.getCapacidade() > 0) {
-            mesaExistente.setCapacidade(mesa.getCapacidade());
+        if(mesaDTO.getCapacidade() > 0) {
+            mesaExistente.setCapacidade(mesaDTO.getCapacidade());
         }
         
-        if(mesa.getStatus() != null && !mesa.getStatus().isEmpty()) {
-            mesaExistente.setStatus(mesa.getStatus());
+        if(mesaDTO.getStatus() != null) {
+            mesaExistente.setStatus(mesaDTO.getStatus());
         }
         
-        return repository.save(mesaExistente);
+        Mesa mesaAtualizada = repository.save(mesaExistente);
+        return entityToDTO(mesaAtualizada);
     }
 
     public void excluirMesa(Long id) {
         if (repository.findById(id).isEmpty()) {
-            throw new RuntimeException("Mesa Não Registrada");
+            throw new EntidadeNaoEncontradaException("Mesa Não Registrada");
         } else {
             repository.deleteById(id);
         }
+    }
+
+    private MesaDTO entityToDTO(Mesa mesa) {
+        MesaDTO dto = new MesaDTO();
+        dto.setId(mesa.getId());
+        dto.setNumero(mesa.getNumero());
+        dto.setCapacidade(mesa.getCapacidade());
+        dto.setStatus(mesa.getStatus());
+        return dto;
+    }
+
+    private Mesa dtoToEntity(MesaDTO dto) {
+        Mesa mesa = new Mesa();
+        if (dto.getId() != null) {
+            mesa.setId(dto.getId());
+        }
+        mesa.setNumero(dto.getNumero());
+        mesa.setCapacidade(dto.getCapacidade());
+        mesa.setStatus(dto.getStatus());
+        return mesa;
     }
 }

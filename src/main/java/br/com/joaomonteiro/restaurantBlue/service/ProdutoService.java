@@ -1,5 +1,7 @@
 package br.com.joaomonteiro.restaurantBlue.service;
 
+import br.com.joaomonteiro.restaurantBlue.dto.ProdutoDTO;
+import br.com.joaomonteiro.restaurantBlue.exception.EntidadeNaoEncontradaException;
 import br.com.joaomonteiro.restaurantBlue.model.Produto;
 import br.com.joaomonteiro.restaurantBlue.repository.ProdutoRepository;
 import lombok.RequiredArgsConstructor;
@@ -13,58 +15,96 @@ public class ProdutoService {
 
     private final ProdutoRepository repository;
 
-    public Produto criarProduto(Produto produto) {
-        return repository.save(produto);
+    public ProdutoDTO criarProduto(ProdutoDTO produtoDTO) {
+        Produto produto = dtoToEntity(produtoDTO);
+        Produto produtoSalvo = repository.save(produto);
+        return entityToDTO(produtoSalvo);
     }
 
-    public List<Produto> listarProdutos() {
-        return repository.findAll();
+    public List<ProdutoDTO> listarProdutos() {
+        return repository.findAll().stream()
+                .map(this::entityToDTO)
+                .toList();
     }
 
-    public Produto buscarPorID(Long id) {
-        if (repository.findById(id).isEmpty()) {
-            throw new RuntimeException("Produto Não Registrado");
-        } else {
-            return repository.findById(id).get();
-        }
+    public ProdutoDTO buscarPorID(Long id) {
+        Produto produto = repository.findById(id)
+                .orElseThrow(() -> new EntidadeNaoEncontradaException("Produto Não Registrado"));
+        return entityToDTO(produto);
     }
 
-    public Produto atualizarProduto(Produto produto, Long id) {
+    public ProdutoDTO atualizarProduto(ProdutoDTO produtoDTO, Long id) {
         Produto produtoExistente = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Produto Não Registrado"));
+                .orElseThrow(() -> new EntidadeNaoEncontradaException("Produto Não Registrado"));
 
-        if (produto.getNome() != null) {
-            produtoExistente.setNome(produto.getNome());
+        if (produtoDTO.getNome() != null) {
+            produtoExistente.setNome(produtoDTO.getNome());
         }
 
-        if (produto.getDescricao() != null) {
-            produtoExistente.setDescricao(produto.getDescricao());
+        if (produtoDTO.getDescricao() != null) {
+            produtoExistente.setDescricao(produtoDTO.getDescricao());
         }
 
-        if (produto.getPreco() != null) {
-            produtoExistente.setPreco(produto.getPreco());
+        if (produtoDTO.getPreco() != null) {
+            produtoExistente.setPreco(produtoDTO.getPreco());
         }
 
-        if (produto.getCategoria() != null) {
-            produtoExistente.setCategoria(produto.getCategoria());
+        if (produtoDTO.getCategoria() != null) {
+            produtoExistente.setCategoria(produtoDTO.getCategoria());
         }
 
-        if (produto.isDisponivel()) {
-            produtoExistente.setDisponivel(true);
-        } else {
-            produtoExistente.setDisponivel(false);
-        }
+        produtoExistente.setDisponivel(produtoDTO.isDisponivel());
 
-        return repository.save(produtoExistente);
+        Produto produtoAtualizado = repository.save(produtoExistente);
+        return entityToDTO(produtoAtualizado);
     }
 
     public void excluirProduto(Long id) {
         if (repository.findById(id).isEmpty()) {
-            throw new RuntimeException("Produto Não Registrado");
+            throw new EntidadeNaoEncontradaException("Produto Não Registrado");
         } else {
             repository.deleteById(id);
         }
     }
 
+    public List<ProdutoDTO> buscarPorCategoria(br.com.joaomonteiro.restaurantBlue.auxiliar.Categoria categoria) {
+        return repository.buscarPorCategoria(categoria).stream()
+                .map(this::entityToDTO)
+                .toList();
+    }
+
+    public List<ProdutoDTO> buscarDisponibles() {
+        return repository.buscarDisponibles().stream()
+                .map(this::entityToDTO)
+                .toList();
+    }
+
+    public List<ProdutoDTO> buscarPorPrecoMenorOuIgual(Double preco) {
+        return repository.buscarPorPrecoMenorOuIgual(preco).stream()
+                .map(this::entityToDTO)
+                .toList();
+    }
+
+    private ProdutoDTO entityToDTO(Produto produto) {
+        ProdutoDTO dto = new ProdutoDTO();
+        dto.setId(produto.getId());
+        dto.setNome(produto.getNome());
+        dto.setDescricao(produto.getDescricao());
+        dto.setPreco(produto.getPreco());
+        dto.setCategoria(produto.getCategoria());
+        dto.setDisponivel(produto.isDisponivel());
+        return dto;
+    }
+
+    private Produto dtoToEntity(ProdutoDTO dto) {
+        Produto produto = new Produto();
+        produto.setId(dto.getId());
+        produto.setNome(dto.getNome());
+        produto.setDescricao(dto.getDescricao());
+        produto.setPreco(dto.getPreco());
+        produto.setCategoria(dto.getCategoria());
+        produto.setDisponivel(dto.isDisponivel());
+        return produto;
+    }
 
 }

@@ -1,7 +1,8 @@
 package br.com.joaomonteiro.restaurantBlue.controller;
 
-import br.com.joaomonteiro.restaurantBlue.model.Mesa;
+import br.com.joaomonteiro.restaurantBlue.dto.MesaDTO;
 import br.com.joaomonteiro.restaurantBlue.service.MesaService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,28 +13,29 @@ import java.util.List;
 @RestController
 @RequestMapping("/mesas")
 @RequiredArgsConstructor
+@CrossOrigin
 public class MesaController {
 
     private final MesaService service;
 
     @PostMapping
-    public ResponseEntity<Mesa> criarMesa(@RequestBody Mesa mesa) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.criarMesa(mesa));
+    public ResponseEntity<MesaDTO> criarMesa(@Valid @RequestBody MesaDTO mesaDTO) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.criarMesa(mesaDTO));
     }
 
     @GetMapping
-    public List<Mesa> listarMesas() {
+    public List<MesaDTO> listarMesas() {
         return service.listarMesas();
     }
 
     @GetMapping("/{id}")
-    public Mesa buscarPorId(@PathVariable Long id) {
+    public MesaDTO buscarPorId(@PathVariable Long id) {
         return service.buscarPorID(id);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Mesa> atualizarMesa(@RequestBody Mesa mesa, @PathVariable Long id) {
-        return ResponseEntity.ok(service.atualizarMesa(mesa, id));
+    public ResponseEntity<MesaDTO> atualizarMesa(@Valid @RequestBody MesaDTO mesaDTO, @PathVariable Long id) {
+        return ResponseEntity.ok(service.atualizarMesa(mesaDTO, id));
     }
 
     @DeleteMapping("/{id}")

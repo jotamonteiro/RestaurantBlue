@@ -1,0 +1,1283 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Restaurant Blue — Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --blue-deep: #0a1628;
+    --blue-mid: #112244;
+    --blue-accent: #1a3a6e;
+    --blue-bright: #2563eb;
+    --blue-light: #3b82f6;
+    --gold: #f0c040;
+    --gold-dim: #c9a227;
+    --cream: #f5f0e8;
+    --white: #ffffff;
+    --gray: #8899bb;
+    --red: #ef4444;
+    --green: #22c55e;
+    --orange: #f59e0b;
+    --border: rgba(255,255,255,0.07);
+    --card: rgba(255,255,255,0.04);
+    --card-hover: rgba(255,255,255,0.08);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--blue-deep);
+    color: var(--cream);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    position: fixed; top: 0; left: 0; bottom: 0;
+    width: 240px;
+    background: var(--blue-mid);
+    border-right: 1px solid var(--border);
+    display: flex; flex-direction: column;
+    z-index: 100;
+    transition: transform .3s ease;
+  }
+  .logo {
+    padding: 28px 24px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .logo-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: var(--white);
+    letter-spacing: -.5px;
+  }
+  .logo-title span { color: var(--gold); }
+  .logo-sub {
+    font-family: 'DM Mono', monospace;
+    font-size: .65rem;
+    color: var(--gray);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+  .nav { flex: 1; padding: 16px 0; overflow-y: auto; }
+  .nav-section {
+    font-family: 'DM Mono', monospace;
+    font-size: .6rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--gray);
+    padding: 8px 24px 4px;
+    margin-top: 8px;
+  }
+  .nav-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 24px;
+    cursor: pointer;
+    transition: all .2s;
+    border-left: 2px solid transparent;
+    font-size: .875rem;
+    color: var(--gray);
+    font-weight: 400;
+  }
+  .nav-item:hover { color: var(--white); background: var(--card); }
+  .nav-item.active {
+    color: var(--gold);
+    border-left-color: var(--gold);
+    background: rgba(240,192,64,.07);
+    font-weight: 500;
+  }
+  .nav-icon { width: 18px; height: 18px; opacity: .8; flex-shrink: 0; }
+
+  /* MAIN */
+  .main { margin-left: 240px; min-height: 100vh; padding: 32px; }
+  .page { display: none; }
+  .page.active { display: block; animation: fadeIn .3s ease; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+
+  /* HEADER */
+  .page-header {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    margin-bottom: 32px;
+  }
+  .page-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--white);
+  }
+  .page-sub { color: var(--gray); font-size: .875rem; margin-top: 4px; }
+  .btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .875rem;
+    font-weight: 500;
+    transition: all .2s;
+  }
+  .btn-primary { background: var(--blue-bright); color: var(--white); }
+  .btn-primary:hover { background: var(--blue-light); transform: translateY(-1px); }
+  .btn-ghost { background: var(--card); color: var(--cream); border: 1px solid var(--border); }
+  .btn-ghost:hover { background: var(--card-hover); }
+  .btn-danger { background: rgba(239,68,68,.15); color: var(--red); border: 1px solid rgba(239,68,68,.3); }
+  .btn-danger:hover { background: rgba(239,68,68,.25); }
+  .btn-sm { padding: 6px 12px; font-size: .8rem; }
+
+  /* CARDS / GRID */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    transition: all .2s;
+  }
+  .stat-card:hover { background: var(--card-hover); transform: translateY(-2px); }
+  .stat-label { font-size: .75rem; color: var(--gray); text-transform: uppercase; letter-spacing: 1px; font-family: 'DM Mono', monospace; }
+  .stat-value { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 700; color: var(--white); margin: 6px 0 0; }
+  .stat-value.gold { color: var(--gold); }
+  .stat-value.green { color: var(--green); }
+  .stat-value.red { color: var(--red); }
+
+  /* TABLE */
+  .table-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+  .table-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--border);
+  }
+  .table-title { font-weight: 600; font-size: .95rem; color: var(--white); }
+  .search-bar {
+    display: flex; align-items: center; gap: 8px;
+    background: rgba(255,255,255,.06);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 14px;
+    min-width: 220px;
+  }
+  .search-bar input {
+    background: none; border: none; outline: none;
+    color: var(--cream); font-family: 'DM Sans', sans-serif;
+    font-size: .875rem; flex: 1;
+  }
+  .search-bar input::placeholder { color: var(--gray); }
+  table { width: 100%; border-collapse: collapse; }
+  thead th {
+    padding: 12px 24px;
+    text-align: left;
+    font-size: .72rem;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--gray);
+    border-bottom: 1px solid var(--border);
+  }
+  tbody tr { transition: background .15s; }
+  tbody tr:hover { background: rgba(255,255,255,.03); }
+  tbody td {
+    padding: 14px 24px;
+    font-size: .875rem;
+    border-bottom: 1px solid var(--border);
+  }
+  tbody tr:last-child td { border-bottom: none; }
+
+  /* BADGES */
+  .badge {
+    display: inline-flex; align-items: center;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: .72rem;
+    font-weight: 500;
+    font-family: 'DM Mono', monospace;
+  }
+  .badge-green { background: rgba(34,197,94,.15); color: var(--green); }
+  .badge-red { background: rgba(239,68,68,.15); color: var(--red); }
+  .badge-orange { background: rgba(245,158,11,.15); color: var(--orange); }
+  .badge-blue { background: rgba(59,130,246,.15); color: var(--blue-light); }
+  .badge-gray { background: rgba(136,153,187,.15); color: var(--gray); }
+
+  /* FORM / MODAL */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,.7); backdrop-filter: blur(4px);
+    z-index: 200; align-items: center; justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--blue-mid);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    width: 520px;
+    max-width: 95vw;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: slideUp .25s ease;
+  }
+  @keyframes slideUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:none; } }
+  .modal-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 24px 28px;
+    border-bottom: 1px solid var(--border);
+  }
+  .modal-title { font-family: 'Playfair Display', serif; font-size: 1.25rem; font-weight: 700; color: var(--white); }
+  .modal-close { background: none; border: none; color: var(--gray); cursor: pointer; font-size: 1.4rem; line-height: 1; transition: color .2s; }
+  .modal-close:hover { color: var(--white); }
+  .modal-body { padding: 24px 28px; }
+  .modal-footer { padding: 16px 28px 24px; display: flex; gap: 10px; justify-content: flex-end; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .form-row.full { grid-template-columns: 1fr; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+  .form-label { font-size: .78rem; font-family: 'DM Mono', monospace; letter-spacing: 1px; text-transform: uppercase; color: var(--gray); }
+  .form-control {
+    background: rgba(255,255,255,.05);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: var(--cream);
+    font-family: 'DM Sans', sans-serif;
+    font-size: .875rem;
+    outline: none;
+    transition: border-color .2s;
+    width: 100%;
+  }
+  .form-control:focus { border-color: var(--blue-bright); }
+  select.form-control option { background: var(--blue-mid); }
+
+  /* TOAST */
+  .toast {
+    position: fixed; bottom: 24px; right: 24px;
+    background: var(--blue-accent);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 20px;
+    font-size: .875rem;
+    color: var(--white);
+    box-shadow: 0 8px 30px rgba(0,0,0,.4);
+    z-index: 300;
+    transform: translateY(100px); opacity: 0;
+    transition: all .3s ease;
+    max-width: 320px;
+  }
+  .toast.show { transform: none; opacity: 1; }
+  .toast.success { border-left: 3px solid var(--green); }
+  .toast.error { border-left: 3px solid var(--red); }
+
+  /* LOADING */
+  .loading {
+    display: flex; align-items: center; gap: 10px;
+    color: var(--gray); font-size: .875rem; padding: 24px;
+  }
+  .spinner {
+    width: 18px; height: 18px;
+    border: 2px solid var(--border);
+    border-top-color: var(--blue-bright);
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* MESAS GRID */
+  .mesas-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; }
+  .mesa-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .mesa-card:hover { background: var(--card-hover); transform: translateY(-3px); }
+  .mesa-card.livre { border-color: rgba(34,197,94,.3); }
+  .mesa-card.ocupada { border-color: rgba(239,68,68,.3); }
+  .mesa-number { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 900; color: var(--white); }
+  .mesa-cap { font-size: .75rem; color: var(--gray); margin: 4px 0; }
+
+  /* CONFIG BAR */
+  .config-bar {
+    background: rgba(37,99,235,.1);
+    border: 1px solid rgba(37,99,235,.3);
+    border-radius: 10px;
+    padding: 14px 20px;
+    margin-bottom: 24px;
+    display: flex; align-items: center; gap: 14px;
+    flex-wrap: wrap;
+  }
+  .config-bar label { font-size: .8rem; color: var(--gray); font-family: 'DM Mono', monospace; }
+  .config-bar input {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 12px;
+    color: var(--cream);
+    font-size: .875rem;
+    outline: none;
+    flex: 1;
+    min-width: 200px;
+  }
+  .config-bar input:focus { border-color: var(--blue-bright); }
+
+  .empty-state {
+    text-align: center; padding: 48px 24px; color: var(--gray);
+  }
+  .empty-state-icon { font-size: 2.5rem; margin-bottom: 10px; }
+
+  /* Tabs */
+  .tabs { display: flex; gap: 4px; margin-bottom: 24px; }
+  .tab {
+    padding: 8px 16px; border-radius: 8px; cursor: pointer;
+    font-size: .85rem; transition: all .2s; color: var(--gray);
+    border: 1px solid transparent;
+  }
+  .tab.active { background: rgba(37,99,235,.15); color: var(--blue-light); border-color: rgba(37,99,235,.3); }
+  .tab:hover:not(.active) { color: var(--cream); background: var(--card); }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="logo">
+    <div class="logo-title">Restaurant<span>Blue</span></div>
+    <div class="logo-sub">Sistema de Gestão</div>
+  </div>
+  <nav class="nav">
+    <div class="nav-section">Principal</div>
+    <div class="nav-item active" onclick="navigate('dashboard')">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      Dashboard
+    </div>
+    <div class="nav-section">Restaurante</div>
+    <div class="nav-item" onclick="navigate('mesas')">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7h18M3 12h18M3 17h18"/><rect x="7" y="3" width="10" height="18" rx="1"/></svg>
+      Mesas
+    </div>
+    <div class="nav-item" onclick="navigate('pedidos')">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+      Pedidos
+    </div>
+    <div class="nav-item" onclick="navigate('produtos')">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7H4a2 2 0 00-2 2v6a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>
+      Cardápio / Produtos
+    </div>
+    <div class="nav-section">Pessoas</div>
+    <div class="nav-item" onclick="navigate('clientes')">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Clientes
+    </div>
+    <div class="nav-item" onclick="navigate('funcionarios')">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+      Funcionários
+    </div>
+  </nav>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- CONFIG BAR -->
+  <div class="config-bar">
+    <label>API BASE URL:</label>
+    <input type="text" id="apiBaseUrl" placeholder="http://localhost:8080" value="http://localhost:8080">
+    <button class="btn btn-primary btn-sm" onclick="reloadCurrentPage()">Conectar</button>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div id="page-dashboard" class="page active">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Dashboard</div>
+        <div class="page-sub">Visão geral do restaurante</div>
+      </div>
+    </div>
+    <div class="stats-grid" id="dash-stats">
+      <div class="stat-card"><div class="stat-label">Clientes</div><div class="stat-value gold" id="stat-clientes">—</div></div>
+      <div class="stat-card"><div class="stat-label">Funcionários</div><div class="stat-value" id="stat-func">—</div></div>
+      <div class="stat-card"><div class="stat-label">Mesas</div><div class="stat-value" id="stat-mesas">—</div></div>
+      <div class="stat-card"><div class="stat-label">Pedidos</div><div class="stat-value" id="stat-pedidos">—</div></div>
+      <div class="stat-card"><div class="stat-label">Produtos</div><div class="stat-value" id="stat-produtos">—</div></div>
+      <div class="stat-card"><div class="stat-label">Mesas Livres</div><div class="stat-value green" id="stat-livres">—</div></div>
+    </div>
+    <div class="table-card">
+      <div class="table-header"><span class="table-title">Pedidos Recentes</span></div>
+      <div id="dash-pedidos-list"><div class="loading"><div class="spinner"></div> Carregando...</div></div>
+    </div>
+  </div>
+
+  <!-- MESAS -->
+  <div id="page-mesas" class="page">
+    <div class="page-header">
+      <div><div class="page-title">Mesas</div><div class="page-sub">Gerenciar mesas do restaurante</div></div>
+      <button class="btn btn-primary" onclick="openModal('mesa')">+ Nova Mesa</button>
+    </div>
+    <div id="mesas-container" class="mesas-grid"></div>
+  </div>
+
+  <!-- PEDIDOS -->
+  <div id="page-pedidos" class="page">
+    <div class="page-header">
+      <div><div class="page-title">Pedidos</div><div class="page-sub">Controle de pedidos</div></div>
+      <button class="btn btn-primary" onclick="openModal('pedido')">+ Novo Pedido</button>
+    </div>
+    <div class="tabs">
+      <div class="tab active" onclick="filterPedidos(null, this)">Todos</div>
+      <div class="tab" onclick="filterPedidos('Pendente', this)">Pendentes</div>
+      <div class="tab" onclick="filterPedidos('EmPreparacao', this)">Em Preparação</div>
+      <div class="tab" onclick="filterPedidos('Pronto', this)">Prontos</div>
+      <div class="tab" onclick="filterPedidos('Entregue', this)">Entregues</div>
+    </div>
+    <div class="table-card">
+      <div class="table-header">
+        <span class="table-title">Lista de Pedidos</span>
+        <div class="search-bar">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input type="text" placeholder="Buscar..." oninput="searchPedidos(this.value)">
+        </div>
+      </div>
+      <div id="pedidos-table"></div>
+    </div>
+  </div>
+
+  <!-- PRODUTOS -->
+  <div id="page-produtos" class="page">
+    <div class="page-header">
+      <div><div class="page-title">Cardápio</div><div class="page-sub">Produtos e itens do menu</div></div>
+      <button class="btn btn-primary" onclick="openModal('produto')">+ Novo Produto</button>
+    </div>
+    <div class="tabs" id="cat-tabs">
+      <div class="tab active" onclick="filterProdutos(null, this)">Todos</div>
+      <div class="tab" onclick="filterProdutos('Bebida', this)">Bebidas</div>
+      <div class="tab" onclick="filterProdutos('Comida', this)">Comidas</div>
+      <div class="tab" onclick="filterProdutos('PratoPrincipal', this)">Pratos</div>
+      <div class="tab" onclick="filterProdutos('Entrada', this)">Entradas</div>
+      <div class="tab" onclick="filterProdutos('Sobremesa', this)">Sobremesas</div>
+      <div class="tab" onclick="filterProdutos('Acompanhamento', this)">Acompanhamentos</div>
+    </div>
+    <div class="table-card">
+      <div class="table-header">
+        <span class="table-title">Produtos</span>
+        <div class="search-bar">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input type="text" placeholder="Buscar produto..." oninput="searchProdutos(this.value)">
+        </div>
+      </div>
+      <div id="produtos-table"></div>
+    </div>
+  </div>
+
+  <!-- CLIENTES -->
+  <div id="page-clientes" class="page">
+    <div class="page-header">
+      <div><div class="page-title">Clientes</div><div class="page-sub">Base de clientes cadastrados</div></div>
+      <button class="btn btn-primary" onclick="openModal('cliente')">+ Novo Cliente</button>
+    </div>
+    <div class="table-card">
+      <div class="table-header">
+        <span class="table-title">Clientes</span>
+        <div class="search-bar">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input type="text" placeholder="Buscar cliente..." oninput="searchClientes(this.value)">
+        </div>
+      </div>
+      <div id="clientes-table"></div>
+    </div>
+  </div>
+
+  <!-- FUNCIONÁRIOS -->
+  <div id="page-funcionarios" class="page">
+    <div class="page-header">
+      <div><div class="page-title">Funcionários</div><div class="page-sub">Equipe do restaurante</div></div>
+      <button class="btn btn-primary" onclick="openModal('funcionario')">+ Novo Funcionário</button>
+    </div>
+    <div class="table-card">
+      <div class="table-header">
+        <span class="table-title">Funcionários</span>
+        <div class="search-bar">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input type="text" placeholder="Buscar funcionário..." oninput="searchFuncionarios(this.value)">
+        </div>
+      </div>
+      <div id="funcionarios-table"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- MODALS -->
+<!-- Mesa Modal -->
+<div class="modal-overlay" id="modal-mesa">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title" id="modal-mesa-title">Nova Mesa</div>
+      <button class="modal-close" onclick="closeModal('mesa')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="mesa-id">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Número</label>
+          <input type="number" class="form-control" id="mesa-numero" placeholder="1">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Capacidade</label>
+          <input type="number" class="form-control" id="mesa-capacidade" placeholder="4">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Status</label>
+        <select class="form-control" id="mesa-status">
+          <option value="LIVRE">LIVRE</option>
+          <option value="OCUPADA">OCUPADA</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('mesa')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveMesa()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Pedido Modal -->
+<div class="modal-overlay" id="modal-pedido">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title" id="modal-pedido-title">Novo Pedido</div>
+      <button class="modal-close" onclick="closeModal('pedido')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="pedido-id">
+      <div class="form-group">
+        <label class="form-label">Descrição</label>
+        <input type="text" class="form-control" id="pedido-descricao" placeholder="Detalhes do pedido">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Valor (R$)</label>
+          <input type="number" step="0.01" class="form-control" id="pedido-valor" placeholder="0.00">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Mesa ID</label>
+          <input type="number" class="form-control" id="pedido-mesaId" placeholder="1">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Cliente ID</label>
+        <input type="number" class="form-control" id="pedido-clienteId" placeholder="1">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Status Pedido</label>
+          <select class="form-control" id="pedido-status">
+            <option value="Pendente">Pendente</option>
+            <option value="EmPreparacao">Em Preparação</option>
+            <option value="Pronto">Pronto</option>
+            <option value="Entregue">Entregue</option>
+            <option value="Cancelado">Cancelado</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Status Pagamento</label>
+          <select class="form-control" id="pedido-statusPagamento">
+            <option value="Pendente">Pendente</option>
+            <option value="Pago">Pago</option>
+            <option value="Cancelado">Cancelado</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('pedido')">Cancelar</button>
+      <button class="btn btn-primary" onclick="savePedido()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Produto Modal -->
+<div class="modal-overlay" id="modal-produto">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title" id="modal-produto-title">Novo Produto</div>
+      <button class="modal-close" onclick="closeModal('produto')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="produto-id">
+      <div class="form-group">
+        <label class="form-label">Nome</label>
+        <input type="text" class="form-control" id="produto-nome" placeholder="Nome do produto">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Descrição</label>
+        <input type="text" class="form-control" id="produto-descricao" placeholder="Descrição do produto">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Preço (R$)</label>
+          <input type="number" step="0.01" class="form-control" id="produto-preco" placeholder="0.00">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Categoria</label>
+          <select class="form-control" id="produto-categoria">
+            <option value="Bebida">Bebida</option>
+            <option value="Comida">Comida</option>
+            <option value="PratoPrincipal">Prato Principal</option>
+            <option value="Entrada">Entrada</option>
+            <option value="Sobremesa">Sobremesa</option>
+            <option value="Acompanhamento">Acompanhamento</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Disponível</label>
+        <select class="form-control" id="produto-disponivel">
+          <option value="true">Sim</option>
+          <option value="false">Não</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('produto')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveProduto()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Cliente Modal -->
+<div class="modal-overlay" id="modal-cliente">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title" id="modal-cliente-title">Novo Cliente</div>
+      <button class="modal-close" onclick="closeModal('cliente')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="cliente-id">
+      <div class="form-group">
+        <label class="form-label">Nome</label>
+        <input type="text" class="form-control" id="cliente-nome" placeholder="Nome completo">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">CPF</label>
+          <input type="text" class="form-control" id="cliente-cpf" placeholder="000.000.000-00">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Data Nascimento</label>
+          <input type="date" class="form-control" id="cliente-datanasc">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input type="email" class="form-control" id="cliente-email" placeholder="email@exemplo.com">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Telefone</label>
+        <input type="text" class="form-control" id="cliente-telefone" placeholder="(83) 99999-9999">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Endereço</label>
+        <input type="text" class="form-control" id="cliente-endereco" placeholder="Rua, número, bairro">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('cliente')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveCliente()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Funcionario Modal -->
+<div class="modal-overlay" id="modal-funcionario">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title" id="modal-funcionario-title">Novo Funcionário</div>
+      <button class="modal-close" onclick="closeModal('funcionario')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="func-id">
+      <div class="form-group">
+        <label class="form-label">Nome</label>
+        <input type="text" class="form-control" id="func-nome" placeholder="Nome completo">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">CPF</label>
+          <input type="text" class="form-control" id="func-cpf" placeholder="000.000.000-00">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Data Nascimento</label>
+          <input type="date" class="form-control" id="func-datanasc">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Cargo</label>
+          <select class="form-control" id="func-cargo">
+            <option value="Chef">Chef</option>
+            <option value="Gerente">Gerente</option>
+            <option value="Recepcionista">Recepcionista</option>
+            <option value="Limpeza">Limpeza</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Data Admissão</label>
+          <input type="date" class="form-control" id="func-dataAdm">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">CEP</label>
+          <input type="text" class="form-control" id="func-cep" placeholder="00000-000" oninput="onCepInput(this.value)">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Número</label>
+          <input type="text" class="form-control" id="func-numero" placeholder="123">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Logradouro</label>
+          <input type="text" class="form-control" id="func-logradouro" placeholder="Rua...">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Bairro</label>
+          <input type="text" class="form-control" id="func-bairro" placeholder="Bairro">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Cidade</label>
+          <input type="text" class="form-control" id="func-localidade" placeholder="Cidade">
+        </div>
+        <div class="form-group">
+          <label class="form-label">UF</label>
+          <input type="text" class="form-control" id="func-uf" placeholder="PB" maxlength="2">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('funcionario')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveFuncionario()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+const API = () => document.getElementById('apiBaseUrl').value.replace(/\/$/, '');
+
+// State
+let allPedidos = [], allProdutos = [], allClientes = [], allFuncionarios = [];
+let pedidoFilter = null, produtoFilter = null;
+
+// Navigation
+function navigate(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  event.currentTarget && event.currentTarget.classList.add('active');
+  loadPage(page);
+}
+
+function reloadCurrentPage() {
+  const active = document.querySelector('.page.active');
+  if (active) {
+    const id = active.id.replace('page-', '');
+    loadPage(id);
+  }
+}
+
+async function loadPage(page) {
+  switch(page) {
+    case 'dashboard': loadDashboard(); break;
+    case 'mesas': loadMesas(); break;
+    case 'pedidos': loadPedidos(); break;
+    case 'produtos': loadProdutos(); break;
+    case 'clientes': loadClientes(); break;
+    case 'funcionarios': loadFuncionarios(); break;
+  }
+}
+
+// API helper
+async function api(method, path, body) {
+  try {
+    const opts = { method, headers: {'Content-Type': 'application/json'} };
+    if (body) opts.body = JSON.stringify(body);
+    const res = await fetch(API() + path, opts);
+    if (!res.ok) {
+      const err = await res.text();
+      throw new Error(err || res.statusText);
+    }
+    if (res.status === 204) return null;
+    return await res.json();
+  } catch(e) {
+    toast('Erro: ' + e.message, 'error');
+    throw e;
+  }
+}
+
+// Toast
+function toast(msg, type = 'success') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast ' + type;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 3500);
+}
+
+// Modal
+function openModal(type, data = null) {
+  const overlay = document.getElementById('modal-' + type);
+  overlay.classList.add('open');
+  if (type === 'mesa') {
+    document.getElementById('modal-mesa-title').textContent = data ? 'Editar Mesa' : 'Nova Mesa';
+    document.getElementById('mesa-id').value = data ? data.id : '';
+    document.getElementById('mesa-numero').value = data ? data.numero : '';
+    document.getElementById('mesa-capacidade').value = data ? data.capacidade : '';
+    document.getElementById('mesa-status').value = data ? data.status : 'LIVRE';
+  } else if (type === 'pedido') {
+    document.getElementById('modal-pedido-title').textContent = data ? 'Editar Pedido' : 'Novo Pedido';
+    document.getElementById('pedido-id').value = data ? data.id : '';
+    document.getElementById('pedido-descricao').value = data ? data.descricao : '';
+    document.getElementById('pedido-valor').value = data ? data.valor : '';
+    document.getElementById('pedido-mesaId').value = data ? data.mesaId : '';
+    document.getElementById('pedido-clienteId').value = data ? data.clienteId : '';
+    document.getElementById('pedido-status').value = data ? data.status : 'Pendente';
+    document.getElementById('pedido-statusPagamento').value = data ? data.statusPagamento : 'Pendente';
+  } else if (type === 'produto') {
+    document.getElementById('modal-produto-title').textContent = data ? 'Editar Produto' : 'Novo Produto';
+    document.getElementById('produto-id').value = data ? data.id : '';
+    document.getElementById('produto-nome').value = data ? data.nome : '';
+    document.getElementById('produto-descricao').value = data ? data.descricao : '';
+    document.getElementById('produto-preco').value = data ? data.preco : '';
+    document.getElementById('produto-categoria').value = data ? data.categoria : 'Comida';
+    document.getElementById('produto-disponivel').value = data ? String(data.disponivel) : 'true';
+  } else if (type === 'cliente') {
+    document.getElementById('modal-cliente-title').textContent = data ? 'Editar Cliente' : 'Novo Cliente';
+    document.getElementById('cliente-id').value = data ? data.id : '';
+    document.getElementById('cliente-nome').value = data ? data.nome : '';
+    document.getElementById('cliente-cpf').value = data ? data.cpf : '';
+    document.getElementById('cliente-datanasc').value = data ? data.datanasc : '';
+    document.getElementById('cliente-email').value = data ? data.email : '';
+    document.getElementById('cliente-telefone').value = data ? data.telefone : '';
+    document.getElementById('cliente-endereco').value = data ? data.endereco : '';
+  } else if (type === 'funcionario') {
+    document.getElementById('modal-funcionario-title').textContent = data ? 'Editar Funcionário' : 'Novo Funcionário';
+    document.getElementById('func-id').value = data ? data.id : '';
+    document.getElementById('func-nome').value = data ? data.nome : '';
+    document.getElementById('func-cpf').value = data ? data.cpf : '';
+    document.getElementById('func-datanasc').value = data ? data.datanasc : '';
+    document.getElementById('func-cargo').value = data ? data.cargo : 'Chef';
+    document.getElementById('func-dataAdm').value = data ? data.dataAdm : '';
+    document.getElementById('func-cep').value = data ? data.cep : '';
+    document.getElementById('func-numero').value = data ? data.numero : '';
+    document.getElementById('func-logradouro').value = data ? data.logradouro : '';
+    document.getElementById('func-bairro').value = data ? data.bairro : '';
+    document.getElementById('func-localidade').value = data ? data.localidade : '';
+    document.getElementById('func-uf').value = data ? data.uf : '';
+  }
+}
+function closeModal(type) {
+  document.getElementById('modal-' + type).classList.remove('open');
+}
+
+// Close modal on overlay click
+document.querySelectorAll('.modal-overlay').forEach(el => {
+  el.addEventListener('click', e => { if (e.target === el) el.classList.remove('open'); });
+});
+
+// ===== DASHBOARD =====
+async function loadDashboard() {
+  try {
+    const [clientes, func, mesas, pedidos, produtos] = await Promise.all([
+      api('GET', '/clientes'), api('GET', '/funcionarios'), api('GET', '/mesas'),
+      api('GET', '/pedidos'), api('GET', '/produtos')
+    ]);
+    document.getElementById('stat-clientes').textContent = clientes.length;
+    document.getElementById('stat-func').textContent = func.length;
+    document.getElementById('stat-mesas').textContent = mesas.length;
+    document.getElementById('stat-pedidos').textContent = pedidos.length;
+    document.getElementById('stat-produtos').textContent = produtos.length;
+    document.getElementById('stat-livres').textContent = mesas.filter(m => m.status === 'LIVRE').length;
+    renderDashPedidos(pedidos.slice(0, 8));
+  } catch(e) {
+    document.getElementById('stat-clientes').textContent = '—';
+  }
+}
+
+function renderDashPedidos(pedidos) {
+  const el = document.getElementById('dash-pedidos-list');
+  if (!pedidos.length) { el.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🍽</div>Sem pedidos ainda</div>'; return; }
+  el.innerHTML = `<table>
+    <thead><tr><th>ID</th><th>Descrição</th><th>Mesa</th><th>Valor</th><th>Status</th><th>Pagamento</th></tr></thead>
+    <tbody>${pedidos.map(p => `<tr>
+      <td><span style="font-family:'DM Mono',monospace;font-size:.8rem;color:var(--gray)">#${p.id}</span></td>
+      <td>${p.descricao || '—'}</td>
+      <td>Mesa ${p.mesaId || '—'}</td>
+      <td style="color:var(--gold);font-family:'DM Mono',monospace">R$ ${(p.valor||0).toFixed(2)}</td>
+      <td>${statusPedidoBadge(p.status)}</td>
+      <td>${statusPagamentoBadge(p.statusPagamento)}</td>
+    </tr>`).join('')}</tbody>
+  </table>`;
+}
+
+// ===== MESAS =====
+async function loadMesas() {
+  const c = document.getElementById('mesas-container');
+  c.innerHTML = '<div class="loading"><div class="spinner"></div> Carregando mesas...</div>';
+  try {
+    const mesas = await api('GET', '/mesas');
+    if (!mesas.length) { c.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🪑</div>Nenhuma mesa cadastrada</div>'; return; }
+    c.innerHTML = mesas.map(m => `
+      <div class="mesa-card ${m.status === 'LIVRE' ? 'livre' : 'ocupada'}" onclick="editMesa(${JSON.stringify(JSON.stringify(m))})">
+        <div class="mesa-number">${m.numero}</div>
+        <div class="mesa-cap">${m.capacidade} lugares</div>
+        ${m.status === 'LIVRE'
+          ? '<span class="badge badge-green">LIVRE</span>'
+          : '<span class="badge badge-red">OCUPADA</span>'}
+        <div style="margin-top:12px;display:flex;gap:6px;justify-content:center">
+          <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();editMesa(${JSON.stringify(JSON.stringify(m))})">Editar</button>
+          <button class="btn btn-danger btn-sm" onclick="event.stopPropagation();deleteMesa(${m.id})">✕</button>
+        </div>
+      </div>`).join('');
+  } catch(e) { c.innerHTML = '<div class="empty-state">Erro ao carregar mesas. Verifique a URL da API.</div>'; }
+}
+
+function editMesa(json) { openModal('mesa', JSON.parse(json)); }
+
+async function saveMesa() {
+  const id = document.getElementById('mesa-id').value;
+  const body = {
+    numero: +document.getElementById('mesa-numero').value,
+    capacidade: +document.getElementById('mesa-capacidade').value,
+    status: document.getElementById('mesa-status').value
+  };
+  try {
+    if (id) { await api('PUT', '/mesas/' + id, body); toast('Mesa atualizada!'); }
+    else { await api('POST', '/mesas', body); toast('Mesa criada!'); }
+    closeModal('mesa'); loadMesas();
+  } catch(e) {}
+}
+
+async function deleteMesa(id) {
+  if (!confirm('Excluir esta mesa?')) return;
+  try { await api('DELETE', '/mesas/' + id); toast('Mesa excluída!'); loadMesas(); } catch(e) {}
+}
+
+// ===== PEDIDOS =====
+async function loadPedidos() {
+  const el = document.getElementById('pedidos-table');
+  el.innerHTML = '<div class="loading"><div class="spinner"></div> Carregando...</div>';
+  try {
+    allPedidos = await api('GET', '/pedidos');
+    renderPedidos(allPedidos);
+  } catch(e) { el.innerHTML = '<div class="empty-state">Erro ao carregar pedidos.</div>'; }
+}
+
+function filterPedidos(status, tab) {
+  pedidoFilter = status;
+  document.querySelectorAll('#page-pedidos .tab').forEach(t => t.classList.remove('active'));
+  tab.classList.add('active');
+  renderPedidos(allPedidos);
+}
+
+function searchPedidos(q) {
+  const filtered = allPedidos.filter(p => (p.descricao||'').toLowerCase().includes(q.toLowerCase()) || String(p.id).includes(q));
+  renderPedidos(filtered);
+}
+
+function renderPedidos(data) {
+  const el = document.getElementById('pedidos-table');
+  let list = pedidoFilter ? data.filter(p => p.status === pedidoFilter) : data;
+  if (!list.length) { el.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📋</div>Nenhum pedido encontrado</div>'; return; }
+  el.innerHTML = `<table>
+    <thead><tr><th>ID</th><th>Descrição</th><th>Mesa</th><th>Cliente</th><th>Valor</th><th>Status</th><th>Pagamento</th><th>Ações</th></tr></thead>
+    <tbody>${list.map(p => `<tr>
+      <td><span style="font-family:'DM Mono',monospace;color:var(--gray)">#${p.id}</span></td>
+      <td>${p.descricao || '—'}</td>
+      <td>Mesa ${p.mesaId || '—'}</td>
+      <td>#${p.clienteId || '—'}</td>
+      <td style="color:var(--gold);font-family:'DM Mono',monospace">R$ ${(p.valor||0).toFixed(2)}</td>
+      <td>${statusPedidoBadge(p.status)}</td>
+      <td>${statusPagamentoBadge(p.statusPagamento)}</td>
+      <td>
+        <button class="btn btn-ghost btn-sm" onclick='openModal("pedido",${JSON.stringify(p)})'>Editar</button>
+        <button class="btn btn-danger btn-sm" style="margin-left:4px" onclick="deletePedido(${p.id})">✕</button>
+      </td>
+    </tr>`).join('')}</tbody>
+  </table>`;
+}
+
+async function savePedido() {
+  const id = document.getElementById('pedido-id').value;
+  const body = {
+    descricao: document.getElementById('pedido-descricao').value,
+    valor: parseFloat(document.getElementById('pedido-valor').value),
+    status: document.getElementById('pedido-status').value,
+    statusPagamento: document.getElementById('pedido-statusPagamento').value,
+    mesaId: +document.getElementById('pedido-mesaId').value,
+    clienteId: +document.getElementById('pedido-clienteId').value
+  };
+  try {
+    if (id) { await api('PUT', '/pedidos/' + id, body); toast('Pedido atualizado!'); }
+    else { await api('POST', '/pedidos', body); toast('Pedido criado!'); }
+    closeModal('pedido'); loadPedidos();
+  } catch(e) {}
+}
+
+async function deletePedido(id) {
+  if (!confirm('Excluir pedido #' + id + '?')) return;
+  try { await api('DELETE', '/pedidos/' + id); toast('Pedido excluído!'); loadPedidos(); } catch(e) {}
+}
+
+// ===== PRODUTOS =====
+async function loadProdutos() {
+  const el = document.getElementById('produtos-table');
+  el.innerHTML = '<div class="loading"><div class="spinner"></div> Carregando...</div>';
+  try {
+    allProdutos = await api('GET', '/produtos');
+    renderProdutos(allProdutos);
+  } catch(e) { el.innerHTML = '<div class="empty-state">Erro ao carregar produtos.</div>'; }
+}
+
+function filterProdutos(cat, tab) {
+  produtoFilter = cat;
+  document.querySelectorAll('#page-produtos .tab').forEach(t => t.classList.remove('active'));
+  tab.classList.add('active');
+  renderProdutos(allProdutos);
+}
+
+function searchProdutos(q) {
+  const filtered = allProdutos.filter(p => p.nome.toLowerCase().includes(q.toLowerCase()) || (p.descricao||'').toLowerCase().includes(q.toLowerCase()));
+  renderProdutos(filtered);
+}
+
+function renderProdutos(data) {
+  const el = document.getElementById('produtos-table');
+  let list = produtoFilter ? data.filter(p => p.categoria === produtoFilter) : data;
+  if (!list.length) { el.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🍕</div>Nenhum produto encontrado</div>'; return; }
+  el.innerHTML = `<table>
+    <thead><tr><th>ID</th><th>Nome</th><th>Descrição</th><th>Categoria</th><th>Preço</th><th>Disponível</th><th>Ações</th></tr></thead>
+    <tbody>${list.map(p => `<tr>
+      <td><span style="font-family:'DM Mono',monospace;color:var(--gray)">#${p.id}</span></td>
+      <td style="font-weight:500;color:var(--white)">${p.nome}</td>
+      <td style="color:var(--gray);font-size:.82rem">${p.descricao || '—'}</td>
+      <td><span class="badge badge-blue">${p.categoria}</span></td>
+      <td style="color:var(--gold);font-family:'DM Mono',monospace">R$ ${(p.preco||0).toFixed(2)}</td>
+      <td>${p.disponivel ? '<span class="badge badge-green">Sim</span>' : '<span class="badge badge-red">Não</span>'}</td>
+      <td>
+        <button class="btn btn-ghost btn-sm" onclick='openModal("produto",${JSON.stringify(p)})'>Editar</button>
+        <button class="btn btn-danger btn-sm" style="margin-left:4px" onclick="deleteProduto(${p.id})">✕</button>
+      </td>
+    </tr>`).join('')}</tbody>
+  </table>`;
+}
+
+async function saveProduto() {
+  const id = document.getElementById('produto-id').value;
+  const body = {
+    nome: document.getElementById('produto-nome').value,
+    descricao: document.getElementById('produto-descricao').value,
+    preco: parseFloat(document.getElementById('produto-preco').value),
+    categoria: document.getElementById('produto-categoria').value,
+    disponivel: document.getElementById('produto-disponivel').value === 'true'
+  };
+  try {
+    if (id) { await api('PUT', '/produtos/' + id, body); toast('Produto atualizado!'); }
+    else { await api('POST', '/produtos', body); toast('Produto criado!'); }
+    closeModal('produto'); loadProdutos();
+  } catch(e) {}
+}
+
+async function deleteProduto(id) {
+  if (!confirm('Excluir produto #' + id + '?')) return;
+  try { await api('DELETE', '/produtos/' + id); toast('Produto excluído!'); loadProdutos(); } catch(e) {}
+}
+
+// ===== CLIENTES =====
+async function loadClientes() {
+  const el = document.getElementById('clientes-table');
+  el.innerHTML = '<div class="loading"><div class="spinner"></div> Carregando...</div>';
+  try {
+    allClientes = await api('GET', '/clientes');
+    renderClientes(allClientes);
+  } catch(e) { el.innerHTML = '<div class="empty-state">Erro ao carregar clientes.</div>'; }
+}
+
+function searchClientes(q) {
+  const filtered = allClientes.filter(c => c.nome.toLowerCase().includes(q.toLowerCase()) || (c.email||'').toLowerCase().includes(q.toLowerCase()));
+  renderClientes(filtered);
+}
+
+function renderClientes(data) {
+  const el = document.getElementById('clientes-table');
+  if (!data.length) { el.innerHTML = '<div class="empty-state"><div class="empty-state-icon">👤</div>Nenhum cliente encontrado</div>'; return; }
+  el.innerHTML = `<table>
+    <thead><tr><th>ID</th><th>Nome</th><th>CPF</th><th>Email</th><th>Telefone</th><th>Endereço</th><th>Ações</th></tr></thead>
+    <tbody>${data.map(c => `<tr>
+      <td><span style="font-family:'DM Mono',monospace;color:var(--gray)">#${c.id}</span></td>
+      <td style="font-weight:500;color:var(--white)">${c.nome}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:.8rem">${c.cpf || '—'}</td>
+      <td style="color:var(--gray)">${c.email || '—'}</td>
+      <td>${c.telefone || '—'}</td>
+      <td style="color:var(--gray);font-size:.82rem">${c.endereco || '—'}</td>
+      <td>
+        <button class="btn btn-ghost btn-sm" onclick='openModal("cliente",${JSON.stringify(c)})'>Editar</button>
+        <button class="btn btn-danger btn-sm" style="margin-left:4px" onclick="deleteCliente(${c.id})">✕</button>
+      </td>
+    </tr>`).join('')}</tbody>
+  </table>`;
+}
+
+async function saveCliente() {
+  const id = document.getElementById('cliente-id').value;
+  const body = {
+    nome: document.getElementById('cliente-nome').value,
+    cpf: document.getElementById('cliente-cpf').value,
+    datanasc: document.getElementById('cliente-datanasc').value,
+    email: document.getElementById('cliente-email').value,
+    telefone: document.getElementById('cliente-telefone').value,
+    endereco: document.getElementById('cliente-endereco').value
+  };
+  try {
+    if (id) { await api('PUT', '/clientes/' + id, body); toast('Cliente atualizado!'); }
+    else { await api('POST', '/clientes', body); toast('Cliente criado!'); }
+    closeModal('cliente'); loadClientes();
+  } catch(e) {}
+}
+
+async function deleteCliente(id) {
+  if (!confirm('Excluir cliente #' + id + '?')) return;
+  try { await api('DELETE', '/clientes/' + id); toast('Cliente excluído!'); loadClientes(); } catch(e) {}
+}
+
+// ===== FUNCIONÁRIOS =====
+async function loadFuncionarios() {
+  const el = document.getElementById('funcionarios-table');
+  el.innerHTML = '<div class="loading"><div class="spinner"></div> Carregando...</div>';
+  try {
+    allFuncionarios = await api('GET', '/funcionarios');
+    renderFuncionarios(allFuncionarios);
+  } catch(e) { el.innerHTML = '<div class="empty-state">Erro ao carregar funcionários.</div>'; }
+}
+
+function searchFuncionarios(q) {
+  const filtered = allFuncionarios.filter(f => f.nome.toLowerCase().includes(q.toLowerCase()) || f.cargo.toLowerCase().includes(q.toLowerCase()));
+  renderFuncionarios(filtered);
+}
+
+function renderFuncionarios(data) {
+  const el = document.getElementById('funcionarios-table');
+  if (!data.length) { el.innerHTML = '<div class="empty-state"><div class="empty-state-icon">👨‍🍳</div>Nenhum funcionário encontrado</div>'; return; }
+  el.innerHTML = `<table>
+    <thead><tr><th>ID</th><th>Nome</th><th>CPF</th><th>Cargo</th><th>Admissão</th><th>Localidade</th><th>Ações</th></tr></thead>
+    <tbody>${data.map(f => `<tr>
+      <td><span style="font-family:'DM Mono',monospace;color:var(--gray)">#${f.id}</span></td>
+      <td style="font-weight:500;color:var(--white)">${f.nome}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:.8rem">${f.cpf || '—'}</td>
+      <td>${cargoBadge(f.cargo)}</td>
+      <td style="color:var(--gray);font-size:.82rem">${f.dataAdm || '—'}</td>
+      <td style="color:var(--gray);font-size:.82rem">${f.localidade || '—'}${f.uf ? '/' + f.uf : ''}</td>
+      <td>
+        <button class="btn btn-ghost btn-sm" onclick='openModal("funcionario",${JSON.stringify(f)})'>Editar</button>
+        <button class="btn btn-danger btn-sm" style="margin-left:4px" onclick="deleteFuncionario(${f.id})">✕</button>
+      </td>
+    </tr>`).join('')}</tbody>
+  </table>`;
+}
+
+async function saveFuncionario() {
+  const id = document.getElementById('func-id').value;
+  const body = {
+    nome: document.getElementById('func-nome').value,
+    cpf: document.getElementById('func-cpf').value,
+    datanasc: document.getElementById('func-datanasc').value,
+    cargo: document.getElementById('func-cargo').value,
+    dataAdm: document.getElementById('func-dataAdm').value,
+    cep: document.getElementById('func-cep').value,
+    numero: document.getElementById('func-numero').value,
+    logradouro: document.getElementById('func-logradouro').value,
+    bairro: document.getElementById('func-bairro').value,
+    localidade: document.getElementById('func-localidade').value,
+    uf: document.getElementById('func-uf').value
+  };
+  try {
+    if (id) { await api('PUT', '/funcionarios/' + id, body); toast('Funcionário atualizado!'); }
+    else { await api('POST', '/funcionarios', body); toast('Funcionário criado!'); }
+    closeModal('funcionario'); loadFuncionarios();
+  } catch(e) {}
+}
+
+async function deleteFuncionario(id) {
+  if (!confirm('Excluir funcionário #' + id + '?')) return;
+  try { await api('DELETE', '/funcionarios/' + id); toast('Funcionário excluído!'); loadFuncionarios(); } catch(e) {}
+}
+
+// ===== ViaCEP =====
+let cepTimer;
+async function onCepInput(cep) {
+  clearTimeout(cepTimer);
+  const clean = cep.replace(/\D/g, '');
+  if (clean.length !== 8) return;
+  cepTimer = setTimeout(async () => {
+    try {
+      const res = await fetch('https://viacep.com.br/ws/' + clean + '/json/');
+      const data = await res.json();
+      if (!data.erro) {
+        document.getElementById('func-logradouro').value = data.logradouro || '';
+        document.getElementById('func-bairro').value = data.bairro || '';
+        document.getElementById('func-localidade').value = data.localidade || '';
+        document.getElementById('func-uf').value = data.uf || '';
+        toast('Endereço preenchido via CEP!');
+      }
+    } catch(e) {}
+  }, 500);
+}
+
+// ===== BADGES =====
+function statusPedidoBadge(s) {
+  const map = {
+    'Pendente': 'badge-orange', 'EmPreparacao': 'badge-blue',
+    'Pronto': 'badge-green', 'Entregue': 'badge-gray', 'Cancelado': 'badge-red'
+  };
+  return `<span class="badge ${map[s]||'badge-gray'}">${s||'—'}</span>`;
+}
+function statusPagamentoBadge(s) {
+  const map = { 'Pendente': 'badge-orange', 'Pago': 'badge-green', 'Cancelado': 'badge-red' };
+  return `<span class="badge ${map[s]||'badge-gray'}">${s||'—'}</span>`;
+}
+function cargoBadge(c) {
+  const map = { 'Chef': 'badge-orange', 'Gerente': 'badge-blue', 'Recepcionista': 'badge-green', 'Limpeza': 'badge-gray' };
+  return `<span class="badge ${map[c]||'badge-gray'}">${c||'—'}</span>`;
+}
+
+// Nav click fix
+document.querySelectorAll('.nav-item').forEach(el => {
+  el.addEventListener('click', function() {
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+
+// Init
+loadDashboard();
+</script>
+</body>
+</html>
