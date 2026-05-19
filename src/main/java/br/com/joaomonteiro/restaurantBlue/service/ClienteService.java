@@ -1,7 +1,9 @@
 package br.com.joaomonteiro.restaurantBlue.service;
 
 
+import br.com.joaomonteiro.restaurantBlue.client.ViaCepClient;
 import br.com.joaomonteiro.restaurantBlue.dto.ClienteDTO;
+import br.com.joaomonteiro.restaurantBlue.dto.ViaCepResponseDTO;
 import br.com.joaomonteiro.restaurantBlue.exception.EntidadeNaoEncontradaException;
 import br.com.joaomonteiro.restaurantBlue.model.Cliente;
 import br.com.joaomonteiro.restaurantBlue.repository.ClienteRepository;
@@ -9,16 +11,29 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class ClienteService {
 
     private final ClienteRepository repository;
+    private final ViaCepClient viaCepClient;
 
     public ClienteDTO criarCliente(ClienteDTO clienteDTO){
         Cliente cliente = dtoToEntity(clienteDTO);
+
+        if (cliente.getCep() != null && !cliente.getCep().isBlank()) {
+            String cepLimpo = cliente.getCep().replaceAll("\\D", "");
+            ViaCepResponseDTO endereco = viaCepClient.buscarPorCep(cepLimpo);
+
+            cliente.setCep(endereco.getCep());
+            cliente.setLogradouro(endereco.getLogradouro());
+            cliente.setBairro(endereco.getBairro());
+            cliente.setLocalidade(endereco.getLocalidade());
+            cliente.setUf(endereco.getUf());
+            // Preserva o numero, pois não vem da API ViaCep
+        }
+
         Cliente clienteSalvo = repository.save(cliente);
         return entityToDTO(clienteSalvo);
     }
@@ -59,8 +74,43 @@ public class ClienteService {
             clienteExistente.setEmail(clienteDTO.getEmail());
         }
 
-        if (clienteDTO.getEndereco() != null) {
-            clienteExistente.setEndereco(clienteDTO.getEndereco());
+        // Se o CEP foi alterado, busca as novas informações na API ViaCep
+        if (clienteDTO.getCep() != null && !clienteDTO.getCep().isEmpty() &&
+            !clienteDTO.getCep().equals(clienteExistente.getCep())) {
+            String cepLimpo = clienteDTO.getCep().replaceAll("\\D", "");
+            ViaCepResponseDTO endereco = viaCepClient.buscarPorCep(cepLimpo);
+
+            clienteExistente.setCep(endereco.getCep());
+            clienteExistente.setLogradouro(endereco.getLogradouro());
+            clienteExistente.setBairro(endereco.getBairro());
+            clienteExistente.setLocalidade(endereco.getLocalidade());
+            clienteExistente.setUf(endereco.getUf());
+        }
+
+        // Atualiza número se informado
+        if (clienteDTO.getNumero() != null) {
+            clienteExistente.setNumero(clienteDTO.getNumero());
+        }
+
+        // Atualiza outros campos de endereço apenas se informados e CEP não foi alterado
+        if (clienteDTO.getCep() == null || clienteDTO.getCep().isEmpty() ||
+            clienteDTO.getCep().equals(clienteExistente.getCep())) {
+
+            if (clienteDTO.getLogradouro() != null) {
+                clienteExistente.setLogradouro(clienteDTO.getLogradouro());
+            }
+
+            if (clienteDTO.getBairro() != null) {
+                clienteExistente.setBairro(clienteDTO.getBairro());
+            }
+
+            if (clienteDTO.getLocalidade() != null) {
+                clienteExistente.setLocalidade(clienteDTO.getLocalidade());
+            }
+
+            if (clienteDTO.getUf() != null) {
+                clienteExistente.setUf(clienteDTO.getUf());
+            }
         }
 
         Cliente clienteAtualizado = repository.save(clienteExistente);
@@ -95,7 +145,12 @@ public class ClienteService {
         dto.setCpf(cliente.getCpf());
         dto.setTelefone(cliente.getTelefone());
         dto.setEmail(cliente.getEmail());
-        dto.setEndereco(cliente.getEndereco());
+        dto.setCep(cliente.getCep());
+        dto.setNumero(cliente.getNumero());
+        dto.setLogradouro(cliente.getLogradouro());
+        dto.setBairro(cliente.getBairro());
+        dto.setLocalidade(cliente.getLocalidade());
+        dto.setUf(cliente.getUf());
         return dto;
     }
 
@@ -109,7 +164,12 @@ public class ClienteService {
         cliente.setCpf(dto.getCpf());
         cliente.setTelefone(dto.getTelefone());
         cliente.setEmail(dto.getEmail());
-        cliente.setEndereco(dto.getEndereco());
+        cliente.setCep(dto.getCep());
+        cliente.setNumero(dto.getNumero());
+        cliente.setLogradouro(dto.getLogradouro());
+        cliente.setBairro(dto.getBairro());
+        cliente.setLocalidade(dto.getLocalidade());
+        cliente.setUf(dto.getUf());
         return cliente;
     }
 
