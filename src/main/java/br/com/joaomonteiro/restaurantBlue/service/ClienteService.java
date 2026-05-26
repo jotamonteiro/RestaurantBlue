@@ -1,9 +1,9 @@
 package br.com.joaomonteiro.restaurantBlue.service;
 
 
-import br.com.joaomonteiro.restaurantBlue.client.ViaCepClient;
+import br.com.joaomonteiro.restaurantBlue.client.BrasilApiClient;
 import br.com.joaomonteiro.restaurantBlue.dto.ClienteDTO;
-import br.com.joaomonteiro.restaurantBlue.dto.ViaCepResponseDTO;
+import br.com.joaomonteiro.restaurantBlue.dto.BrasilApiCepResponseDTO;
 import br.com.joaomonteiro.restaurantBlue.exception.EntidadeNaoEncontradaException;
 import br.com.joaomonteiro.restaurantBlue.model.Cliente;
 import br.com.joaomonteiro.restaurantBlue.repository.ClienteRepository;
@@ -17,26 +17,26 @@ import java.util.List;
 public class ClienteService {
 
     private final ClienteRepository repository;
-    private final ViaCepClient viaCepClient;
+    private final BrasilApiClient brasilApiClient;
 
     public ClienteDTO criarCliente(ClienteDTO clienteDTO){
-        Cliente cliente = dtoToEntity(clienteDTO);
+         Cliente cliente = dtoToEntity(clienteDTO);
 
-        if (cliente.getCep() != null && !cliente.getCep().isBlank()) {
-            String cepLimpo = cliente.getCep().replaceAll("\\D", "");
-            ViaCepResponseDTO endereco = viaCepClient.buscarPorCep(cepLimpo);
+         if (cliente.getCep() != null && !cliente.getCep().isBlank()) {
+             String cepLimpo = cliente.getCep().replaceAll("\\D", "");
+             BrasilApiCepResponseDTO endereco = brasilApiClient.buscarPorCep(cepLimpo);
 
-            cliente.setCep(endereco.getCep());
-            cliente.setLogradouro(endereco.getLogradouro());
-            cliente.setBairro(endereco.getBairro());
-            cliente.setLocalidade(endereco.getLocalidade());
-            cliente.setUf(endereco.getUf());
-            // Preserva o numero, pois não vem da API ViaCep
-        }
+             cliente.setCep(endereco.getCep());
+             cliente.setLogradouro(endereco.getLogradouro());
+             cliente.setBairro(endereco.getBairro());
+             cliente.setLocalidade(endereco.getLocalidade());
+             cliente.setUf(endereco.getUf());
+             // Preserva o numero, pois não vem da API Brasil API
+         }
 
-        Cliente clienteSalvo = repository.save(cliente);
-        return entityToDTO(clienteSalvo);
-    }
+         Cliente clienteSalvo = repository.save(cliente);
+         return entityToDTO(clienteSalvo);
+     }
 
     public List<ClienteDTO> listarClientes(){
         return repository.findAll().stream()
@@ -74,18 +74,18 @@ public class ClienteService {
             clienteExistente.setEmail(clienteDTO.getEmail());
         }
 
-        // Se o CEP foi alterado, busca as novas informações na API ViaCep
-        if (clienteDTO.getCep() != null && !clienteDTO.getCep().isEmpty() &&
-            !clienteDTO.getCep().equals(clienteExistente.getCep())) {
-            String cepLimpo = clienteDTO.getCep().replaceAll("\\D", "");
-            ViaCepResponseDTO endereco = viaCepClient.buscarPorCep(cepLimpo);
+         // Se o CEP foi alterado, busca as novas informações na API Brasil API
+         if (clienteDTO.getCep() != null && !clienteDTO.getCep().isEmpty() &&
+             !clienteDTO.getCep().equals(clienteExistente.getCep())) {
+             String cepLimpo = clienteDTO.getCep().replaceAll("\\D", "");
+             BrasilApiCepResponseDTO endereco = brasilApiClient.buscarPorCep(cepLimpo);
 
-            clienteExistente.setCep(endereco.getCep());
-            clienteExistente.setLogradouro(endereco.getLogradouro());
-            clienteExistente.setBairro(endereco.getBairro());
-            clienteExistente.setLocalidade(endereco.getLocalidade());
-            clienteExistente.setUf(endereco.getUf());
-        }
+             clienteExistente.setCep(endereco.getCep());
+             clienteExistente.setLogradouro(endereco.getLogradouro());
+             clienteExistente.setBairro(endereco.getBairro());
+             clienteExistente.setLocalidade(endereco.getLocalidade());
+             clienteExistente.setUf(endereco.getUf());
+         }
 
         // Atualiza número se informado
         if (clienteDTO.getNumero() != null) {

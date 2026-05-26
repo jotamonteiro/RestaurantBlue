@@ -1,8 +1,8 @@
 package br.com.joaomonteiro.restaurantBlue.service;
 
-import br.com.joaomonteiro.restaurantBlue.client.ViaCepClient;
+import br.com.joaomonteiro.restaurantBlue.client.BrasilApiClient;
+import br.com.joaomonteiro.restaurantBlue.dto.BrasilApiCepResponseDTO;
 import br.com.joaomonteiro.restaurantBlue.dto.FuncionarioDTO;
-import br.com.joaomonteiro.restaurantBlue.dto.ViaCepResponseDTO;
 import br.com.joaomonteiro.restaurantBlue.exception.EntidadeNaoEncontradaException;
 import br.com.joaomonteiro.restaurantBlue.model.Funcionario;
 import br.com.joaomonteiro.restaurantBlue.repository.FuncionarioRepository;
@@ -10,21 +10,20 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class FuncionarioService {
 
     private final FuncionarioRepository repository;
-    private final ViaCepClient viaCepClient;
+    private final BrasilApiClient brasilapiclient;
 
     public FuncionarioDTO criarFunc(FuncionarioDTO funcionarioDTO){
         Funcionario funcionario = dtoToEntity(funcionarioDTO);
         
         if (funcionario.getCep() != null && !funcionario.getCep().isBlank()) {
             String cepLimpo = funcionario.getCep().replaceAll("\\D", "");
-            ViaCepResponseDTO endereco = viaCepClient.buscarPorCep(cepLimpo);
+            BrasilApiCepResponseDTO endereco = brasilapiclient.buscarPorCep(cepLimpo);
 
             funcionario.setCep(endereco.getCep());
             funcionario.setLogradouro(endereco.getLogradouro());
@@ -78,7 +77,7 @@ public class FuncionarioService {
         if (funcionarioDTO.getCep() != null && !funcionarioDTO.getCep().isEmpty() && 
             !funcionarioDTO.getCep().equals(funcionarioExistente.getCep())) {
             String cepLimpo = funcionarioDTO.getCep().replaceAll("\\D", "");
-            ViaCepResponseDTO endereco = viaCepClient.buscarPorCep(cepLimpo);
+            BrasilApiCepResponseDTO endereco = brasilapiclient.buscarPorCep(cepLimpo);
 
             funcionarioExistente.setCep(endereco.getCep());
             funcionarioExistente.setLogradouro(endereco.getLogradouro());
