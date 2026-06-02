@@ -93,7 +93,7 @@ Este projeto foi desenvolvido exclusivamente para fins de aprendizado na discipl
 
 ## 👨‍💻 Autor
 
-João Monteiro
+João Lucas Monteiro
 
 GitHub: https://github.com/jotamonteiro
 
