@@ -4,18 +4,28 @@ import br.com.joaomonteiro.restaurantBlue.auxiliar.Cargo;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PastOrPresent;
 
 import java.time.LocalDate;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class FuncionarioDTO extends PessoaDTO {
 
-    private long id;
+    private Long id;
+    
+    @NotNull(message = "Cargo não pode ser nulo")
     private Cargo cargo;
+    
+    @NotNull(message = "Data de admissão não pode ser nula")
+    @PastOrPresent(message = "Data de admissão não pode ser futura")
     private LocalDate dataAdm;
+    
     private String cep;
     @JsonProperty("numero")
     private String numero;

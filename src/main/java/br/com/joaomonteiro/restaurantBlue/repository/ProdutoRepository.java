@@ -16,7 +16,7 @@ public interface ProdutoRepository extends JpaRepository <Produto, Long> {
     List<Produto> buscarPorCategoria(@Param("categoria") Categoria categoria);
 
     @Query("SELECT p FROM Produto p WHERE p.disponivel = true")
-    List<Produto> buscarDisponibles();
+    List<Produto> buscarDisponiveis();
 
     @Query("SELECT p FROM Produto p WHERE p.preco <= :preco")
     List<Produto> buscarPorPrecoMenorOuIgual(@Param("preco") Double preco);

@@ -39,9 +39,9 @@ public class MesaController {
     }
 
     @DeleteMapping("/{id}")
-    public void excluirMesa(@PathVariable Long id) {
+    public ResponseEntity<Void> excluirMesa(@PathVariable Long id) {
         service.excluirMesa(id);
+        return ResponseEntity.noContent().build();
     }
 
 }
-

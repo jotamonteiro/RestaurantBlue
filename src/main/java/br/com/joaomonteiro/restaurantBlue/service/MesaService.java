@@ -1,37 +1,39 @@
 package br.com.joaomonteiro.restaurantBlue.service;
 
-import br.com.joaomonteiro.restaurantBlue.auxiliar.StatusMesa;
 import br.com.joaomonteiro.restaurantBlue.dto.MesaDTO;
 import br.com.joaomonteiro.restaurantBlue.exception.EntidadeNaoEncontradaException;
+import br.com.joaomonteiro.restaurantBlue.mapper.MesaMapper;
 import br.com.joaomonteiro.restaurantBlue.model.Mesa;
 import br.com.joaomonteiro.restaurantBlue.repository.MesaRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class MesaService {
 
-    public final MesaRepository repository;
+    private final MesaRepository repository;
+    private final MesaMapper mapper;
 
     public MesaDTO criarMesa(MesaDTO mesaDTO){
-        Mesa mesa = dtoToEntity(mesaDTO);
+        Mesa mesa = mapper.toEntity(mesaDTO);
         Mesa mesaSalva = repository.save(mesa);
-        return entityToDTO(mesaSalva);
+        log.info("Mesa criada: ID {}", mesaSalva.getId());
+        return mapper.toDTO(mesaSalva);
     }
 
     public MesaDTO buscarPorID(Long id){
         Mesa mesa = repository.findById(id)
                 .orElseThrow(() -> new EntidadeNaoEncontradaException("Mesa não encontrada"));
-        return entityToDTO(mesa);
+        return mapper.toDTO(mesa);
     }
 
     public List<MesaDTO> listarMesas() {
-        return repository.findAll().stream()
-                .map(this::entityToDTO)
-                .toList();
+        return mapper.toDTOList(repository.findAll());
     }
 
     public MesaDTO atualizarMesa(MesaDTO mesaDTO, Long id){
@@ -51,7 +53,8 @@ public class MesaService {
         }
         
         Mesa mesaAtualizada = repository.save(mesaExistente);
-        return entityToDTO(mesaAtualizada);
+        log.info("Mesa atualizada: ID {}", id);
+        return mapper.toDTO(mesaAtualizada);
     }
 
     public void excluirMesa(Long id) {
@@ -59,26 +62,8 @@ public class MesaService {
             throw new EntidadeNaoEncontradaException("Mesa Não Registrada");
         } else {
             repository.deleteById(id);
+            log.info("Mesa excluída: ID {}", id);
         }
     }
 
-    private MesaDTO entityToDTO(Mesa mesa) {
-        MesaDTO dto = new MesaDTO();
-        dto.setId(mesa.getId());
-        dto.setNumero(mesa.getNumero());
-        dto.setCapacidade(mesa.getCapacidade());
-        dto.setStatus(mesa.getStatus());
-        return dto;
-    }
-
-    private Mesa dtoToEntity(MesaDTO dto) {
-        Mesa mesa = new Mesa();
-        if (dto.getId() != null) {
-            mesa.setId(dto.getId());
-        }
-        mesa.setNumero(dto.getNumero());
-        mesa.setCapacidade(dto.getCapacidade());
-        mesa.setStatus(dto.getStatus());
-        return mesa;
-    }
 }

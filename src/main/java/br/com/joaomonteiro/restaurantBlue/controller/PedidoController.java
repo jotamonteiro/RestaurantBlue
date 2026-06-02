@@ -6,6 +6,8 @@ import br.com.joaomonteiro.restaurantBlue.dto.PedidoDTO;
 import br.com.joaomonteiro.restaurantBlue.service.PedidoService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,8 +22,9 @@ public class PedidoController {
     private final PedidoService pedidoService;
 
     @PostMapping
-    public PedidoDTO criarPedido(@Valid @RequestBody PedidoDTO pedidoDTO){
-        return pedidoService.criarPedido(pedidoDTO);
+    public ResponseEntity<PedidoDTO> criarPedido(@Valid @RequestBody PedidoDTO pedidoDTO){
+        PedidoDTO resultado = pedidoService.criarPedido(pedidoDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(resultado);
     }
 
     @GetMapping
@@ -40,8 +43,9 @@ public class PedidoController {
     }
 
     @DeleteMapping("/{id}")
-    public void excluirPedido(@PathVariable Long id){
+    public ResponseEntity<Void> excluirPedido(@PathVariable Long id){
         pedidoService.excluirPedido(id);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/status/pedido")

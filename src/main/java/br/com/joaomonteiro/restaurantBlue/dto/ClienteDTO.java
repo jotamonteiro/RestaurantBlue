@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import jakarta.validation.constraints.NotBlank;
 
 
 
@@ -15,7 +16,10 @@ import lombok.NoArgsConstructor;
 public class ClienteDTO extends PessoaDTO {
 
     private Long id;
+    
+    @NotBlank(message = "Telefone não pode ser vazio")
     private String telefone;
+    
     private String email;
     private String cep;
     @JsonProperty("numero")
