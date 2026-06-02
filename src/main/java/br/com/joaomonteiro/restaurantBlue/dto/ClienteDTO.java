@@ -1,28 +1,33 @@
 package br.com.joaomonteiro.restaurantBlue.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import jakarta.validation.constraints.NotBlank;
 
-import java.time.LocalDate;
 
+
+@EqualsAndHashCode(callSuper = true)
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class ClienteDTO extends PessoaDTO {
 
     private Long id;
+    
+    @NotBlank(message = "Telefone não pode ser vazio")
     private String telefone;
+    
     private String email;
-    private String endereco;
-
-    public ClienteDTO(String nome, LocalDate datanasc, String cpf, Long id, String telefone, String email, String endereco) {
-        super(nome, datanasc, cpf);
-        this.id = id;
-        this.telefone = telefone;
-        this.email = email;
-        this.endereco = endereco;
-    }
+    private String cep;
+    @JsonProperty("numero")
+    private String numero;
+    private String logradouro;
+    private String bairro;
+    private String localidade;
+    private String uf;
 
 }
 

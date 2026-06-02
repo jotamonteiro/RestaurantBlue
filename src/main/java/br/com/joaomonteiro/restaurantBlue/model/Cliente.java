@@ -1,6 +1,7 @@
 package br.com.joaomonteiro.restaurantBlue.model;
 
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
@@ -19,7 +20,18 @@ public class Cliente extends Pessoa{
     @NotBlank
     private String telefone;
     private String email;
-    @NotBlank
-    private String endereco;
+    
+    private String cep;
+
+    @JsonProperty("numero")
+    private String numero;
+
+    private String logradouro;
+
+    private String bairro;
+
+    private String localidade;
+
+    private String uf;
 
 }

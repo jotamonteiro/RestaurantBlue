@@ -4,6 +4,6 @@ public enum Cargo {
     Chef,
     Gerente,
     Recepcionista,
-    Limpeza,
+    Limpeza
 
 }

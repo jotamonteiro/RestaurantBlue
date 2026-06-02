@@ -5,6 +5,8 @@ import br.com.joaomonteiro.restaurantBlue.dto.ProdutoDTO;
 import br.com.joaomonteiro.restaurantBlue.service.ProdutoService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -12,14 +14,16 @@ import java.util.List;
 @RestController
 @RequestMapping("/produtos")
 @RequiredArgsConstructor
+@CrossOrigin
 
 public class ProdutoController {
 
     private final ProdutoService produtoService;
 
     @PostMapping
-    public ProdutoDTO criarProduto(@Valid @RequestBody ProdutoDTO produtoDTO){
-        return produtoService.criarProduto(produtoDTO);
+    public ResponseEntity<ProdutoDTO> criarProduto(@Valid @RequestBody ProdutoDTO produtoDTO){
+        ProdutoDTO resultado = produtoService.criarProduto(produtoDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(resultado);
     }
 
     @GetMapping
@@ -38,8 +42,9 @@ public class ProdutoController {
     }
 
     @DeleteMapping("/{id}")
-    public void excluirProduto(@PathVariable Long id) {
+    public ResponseEntity<Void> excluirProduto(@PathVariable Long id) {
         produtoService.excluirProduto(id);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/categoria/{categoria}")
@@ -49,7 +54,7 @@ public class ProdutoController {
 
     @GetMapping("/disponivel/todos")
     public List<ProdutoDTO> buscarDisponibles() {
-        return produtoService.buscarDisponibles();
+        return produtoService.buscarDisponiveis();
     }
 
     @GetMapping("/preco/menores-iguais")

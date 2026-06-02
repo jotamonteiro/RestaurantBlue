@@ -6,6 +6,8 @@ import br.com.joaomonteiro.restaurantBlue.dto.FuncionarioDTO;
 import br.com.joaomonteiro.restaurantBlue.service.FuncionarioService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -13,13 +15,16 @@ import java.util.List;
 @RestController
 @RequestMapping("/funcionarios")
 @RequiredArgsConstructor
+@CrossOrigin
+
 public class FuncionarioController {
 
     private final FuncionarioService funcService;
 
     @PostMapping
-    public FuncionarioDTO criarFunc(@Valid @RequestBody FuncionarioDTO funcionarioDTO){
-        return funcService.criarFunc(funcionarioDTO);
+    public ResponseEntity<FuncionarioDTO> criarFunc(@Valid @RequestBody FuncionarioDTO funcionarioDTO){
+        FuncionarioDTO resultado = funcService.criarFunc(funcionarioDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(resultado);
     }
 
     @GetMapping
@@ -38,8 +43,9 @@ public class FuncionarioController {
     }
 
     @DeleteMapping("/{id}")
-    public void excluirFunc(@PathVariable Long id){
+    public ResponseEntity<Void> excluirFunc(@PathVariable Long id){
         funcService.excluirFunc(id);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/cargo/{cargo}")

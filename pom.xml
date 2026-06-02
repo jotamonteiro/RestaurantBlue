@@ -31,6 +31,7 @@
 		<spring-cloud.version>2025.0.0</spring-cloud.version>
 		<!-- Defina a versão do Lombok usada pelo processador de anotações -->
 		<lombok.version>1.18.32</lombok.version>
+        <org.mapstruct.version>1.6.3</org.mapstruct.version>
 	</properties>
 
 	<dependencyManagement>
@@ -94,6 +95,12 @@
 			<version>${lombok.version}</version>
 		</dependency>
 
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct</artifactId>
+            <version>${org.mapstruct.version}</version>
+        </dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
@@ -128,6 +135,11 @@
 							<artifactId>lombok</artifactId>
 							<version>${lombok.version}</version>
 						</path>
+                        <path>
+                            <groupId>org.mapstruct</groupId>
+                            <artifactId>mapstruct-processor</artifactId>
+                            <version>${org.mapstruct.version}</version>
+                        </path>
 					</annotationProcessorPaths>
                     <source>21</source>
                     <target>21</target>
@@ -168,6 +180,8 @@
 					</excludes>
 				</configuration>
 			</plugin>
+
+
 		</plugins>
 	</build>
 

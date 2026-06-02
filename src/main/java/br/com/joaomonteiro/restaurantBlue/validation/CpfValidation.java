@@ -1,7 +1,6 @@
 package br.com.joaomonteiro.restaurantBlue.validation;
 
 import jakarta.validation.Constraint;
-import org.springframework.validation.annotation.Validated;
 
 import java.lang.annotation.*;
 

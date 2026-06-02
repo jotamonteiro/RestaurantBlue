@@ -17,13 +17,14 @@ import java.time.LocalDate;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
-@Entity
+@AllArgsConstructor
 @NoArgsConstructor
+@Entity
 public class Funcionario extends Pessoa{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     @Enumerated(EnumType.STRING)
     @NotNull

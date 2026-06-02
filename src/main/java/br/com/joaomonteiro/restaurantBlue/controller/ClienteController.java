@@ -5,6 +5,8 @@ import br.com.joaomonteiro.restaurantBlue.dto.ClienteDTO;
 import br.com.joaomonteiro.restaurantBlue.service.ClienteService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -12,14 +14,16 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/clientes")
+@CrossOrigin
 
 public class ClienteController {
 
     private final ClienteService clienteService;
 
     @PostMapping
-    public ClienteDTO criarCliente(@Valid @RequestBody ClienteDTO clienteDTO){
-        return clienteService.criarCliente(clienteDTO);
+    public ResponseEntity<ClienteDTO> criarCliente(@Valid @RequestBody ClienteDTO clienteDTO){
+        ClienteDTO resultado = clienteService.criarCliente(clienteDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(resultado);
     }
 
     @GetMapping
@@ -38,8 +42,9 @@ public class ClienteController {
     }
 
     @DeleteMapping("/{id}")
-    public void excluirCliente(@PathVariable Long id){
+    public ResponseEntity<Void> excluirCliente(@PathVariable Long id){
         clienteService.excluirCliente(id);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/nome/buscar")

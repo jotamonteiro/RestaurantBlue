@@ -1,5 +1,6 @@
 Projeto Desenvolvido Pelos Alunos:
 João Lucas Pereira Monteiro
+Allan da Silva Dantas
 
 
 Acesso ao Swagger: 
