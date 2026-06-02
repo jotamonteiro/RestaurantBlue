@@ -45,7 +45,7 @@ Essa separação facilita a manutenção, organização e evolução do software
 
 ### Pré-requisitos
 
-- Java 17+ (ou versão utilizada no projeto)
+- Java 21 
 - Maven
 - IDE Java (IntelliJ IDEA, Eclipse ou VS Code)
 
