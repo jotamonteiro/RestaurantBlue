@@ -2,7 +2,7 @@
 
 Sistema de gerenciamento de restaurante desenvolvido em **Java** como projeto educacional da disciplina **Tecnologias para Back-End**.
 
-O objetivo do projeto é aplicar conceitos fundamentais de desenvolvimento back-end, incluindo modelagem de entidades, APIs REST, persistência de dados, arquitetura em camadas e boas práticas de desenvolvimento utilizando o ecossistema Java. :contentReference[oaicite:0]{index=0}
+O objetivo do projeto é aplicar conceitos fundamentais de desenvolvimento back-end, incluindo modelagem de entidades, APIs REST, persistência de dados, arquitetura em camadas e boas práticas de desenvolvimento utilizando o ecossistema Java.
 
 ## 📚 Sobre o Projeto
 
